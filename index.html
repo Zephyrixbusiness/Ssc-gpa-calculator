@@ -8,15 +8,6 @@
     <meta name="keywords" content="SSC GPA Calculator, GPA Calculation, SSC Results, Mark to Grade, Grade to Mark">
     <meta name="author" content="Zephyrix">
 
-    <!-- Google Analytics Tracking Code -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0GP5MRWM0P"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-0GP5MRWM0P');
-    </script>
-
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -64,7 +55,6 @@
             padding: 2rem;
             border-radius: 16px;
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.4s ease-out forwards;
         }
 
         h2 {
@@ -95,16 +85,9 @@
             background: #f8fafc;
         }
 
-        select:focus, input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-            background: white;
-        }
-
         .input-group {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             gap: 10px;
             margin-top: 10px;
             position: relative;
@@ -135,7 +118,6 @@
             font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
             margin-top: 1.5rem;
             width: 100%;
         }
@@ -145,26 +127,20 @@
             box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        #result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            display: none;
         }
 
-        @media (max-width: 480px) {
-            .container {
-                padding: 1.5rem;
-                margin: 0 1rem;
-            }
+        .gpa-high { background: #34d399; }
+        .gpa-average { background: #f59e0b; }
+        .gpa-fail { background: #ef4444; }
 
-            h2 {
-                font-size: 1.5rem;
-                padding: 0.75rem 1.5rem;
-            }
-
-            .input-group {
-                flex-direction: column;
-            }
-        }
     </style>
 </head>
 <body>
@@ -206,17 +182,57 @@
                         <span class="or-text">OR</span>
                         <select id="grade-${subject}">
                             <option value="">Select Grade</option>
-                            <option value="A+">A+</option>
-                            <option value="A">A</option>
-                            <option value="A-">A-</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                            <option value="D">D</option>
-                            <option value="F">F</option>
+                            <option value="5">A+</option>
+                            <option value="4">A</option>
+                            <option value="3.5">A-</option>
+                            <option value="3">B</option>
+                            <option value="2">C</option>
+                            <option value="1">D</option>
+                            <option value="0">F</option>
                         </select>
                     </div>
                 `;
             });
+        }
+
+        function calculateGPA() {
+            const resultElement = document.getElementById("result");
+            resultElement.style.display = "none";
+
+            let totalPoints = 0;
+            let validSubjects = 0;
+
+            subjects[document.getElementById("group").value].forEach(subject => {
+                const marks = document.getElementById(`marks-${subject}`).value;
+                const grade = document.getElementById(`grade-${subject}`).value;
+
+                if (marks && grade) {
+                    alert(`Error: Enter either marks or grade for ${subject}, not both.`);
+                    return;
+                }
+
+                if (marks) {
+                    totalPoints += marksToGPA(marks);
+                    validSubjects++;
+                } else if (grade) {
+                    totalPoints += parseFloat(grade);
+                    validSubjects++;
+                }
+            });
+
+            if (validSubjects !== 7) {
+                alert("Please enter marks or grade for all subjects.");
+                return;
+            }
+
+            const gpa = totalPoints / validSubjects;
+            resultElement.textContent = `GPA: ${gpa.toFixed(2)}`;
+            resultElement.style.display = "block";
+            resultElement.className = gpa >= 4.0 ? "gpa-high" : gpa >= 2.0 ? "gpa-average" : "gpa-fail";
+        }
+
+        function marksToGPA(marks) {
+            return marks >= 80 ? 5 : marks >= 70 ? 4 : marks >= 60 ? 3.5 : marks >= 50 ? 3 : marks >= 40 ? 2 : marks >= 33 ? 1 : 0;
         }
 
         window.onload = loadSubjects;
